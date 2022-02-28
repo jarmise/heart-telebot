@@ -1,0 +1,64 @@
+from google.colab import drive
+drive.flush_and_unmount()
+drive.mount('/content/drive', force_remount=True)
+import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set()
+import pandas as pd
+data = pd.read_csv('drive/My Drive/data_heart_new.csv')
+data.drop(['Unnamed: 0'], inplace=True, axis=1)
+renaming = {
+    'age': 'Возраст',
+    'anaemia': 'Анемия',
+    'creatinine_phosphokinase': 'Креатиназа',
+    'diabetes': 'Диабет',
+    'ejection_fraction': 'Фракция выброса',
+    'high_blood_pressure': 'Высокое кровяное давление',
+    'platelets': 'Тромбоциты',
+    'serum_creatinine': 'Креатин',
+    'serum_sodium': 'Натрий',
+    'sex': 'Пол',
+    'smoking': 'Курение',
+    'time': 'Время',
+    'Risk of accute condition': 'Фактор риска'    
+}
+data = data.rename(columns=renaming)
+data.isnull().sum()
+data.shape
+data.drop_duplicates().shape
+data['Фактор риска'].value_counts().plot(kind='bar')
+plt.figure(figsize=(15, 7))
+data[data['Фактор риска']==1]['Возраст'].value_counts().sort_index().plot(kind='bar', alpha=0.5, color = 'gold')
+plt.title('Вероятность острого ухудшения болезни с возрастом', color = 'black')
+data['Курение'][data['Фактор риска']==1].value_counts().plot(kind='bar')
+smok = data[data['Фактор риска']==1].groupby('Курение')['Курение'].count()
+smok.plot.pie(autopct="%.1f%%")
+smok = data[data['Фактор риска']==0].groupby('Курение')['Курение'].count()
+smok.plot.pie(autopct="%.1f%%")
+data['Диабет'].value_counts().plot(kind='bar')
+diab = data[data['Фактор риска']==1].groupby('Диабет')['Диабет'].count()
+diab.plot.pie(autopct="%.1f%%")
+diab = data[data['Фактор риска']==0].groupby('Диабет')['Диабет'].count()
+diab.plot.pie(autopct="%.1f%%")
+data['Высокое кровяное давление'].value_counts().plot(kind='bar')
+hbp = data[data['Фактор риска']==0].groupby('Высокое кровяное давление')['Высокое кровяное давление'].count()
+hbp.plot.pie(autopct="%.1f%%")
+hbp = data[data['Фактор риска']==1].groupby('Высокое кровяное давление')['Высокое кровяное давление'].count()
+hbp.plot.pie(autopct="%.1f%%")
+data['Анемия'].value_counts().plot(kind='bar')
+anaemia = data[data['Фактор риска']==0].groupby('Анемия')['Анемия'].count()
+anaemia.plot.pie(autopct="%.1f%%")
+anaemia = data[data['Фактор риска']==1].groupby('Анемия')['Анемия'].count()
+anaemia.plot.pie(autopct="%.1f%%")
+gender = data[data['Фактор риска']==1].groupby('Пол')['Пол'].count()
+gender.plot.pie(autopct="%.1f%%")
+gender = data[data['Фактор риска']==0].groupby('Пол')['Пол'].count()
+gender.plot.pie(autopct="%.1f%%")
+plt.figure(figsize=(15, 7))
+data[data['Фактор риска']==1]['Время'].value_counts().sort_index().plot(kind='bar', alpha=0.5, color = 'purple')
+plt.title('Вероятность острого ухудшения болезни с временем от начала болезни', color = 'black')
+corr = data.corr()
+plt.figure(figsize=(15,15))
+sns.heatmap(corr,
+            xticklabels=corr.columns,
+            yticklabels=corr.columns)

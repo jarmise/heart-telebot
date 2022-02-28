@@ -1,0 +1,183 @@
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
+from sklearn.metrics import f1_score
+#1-й метод - дерево
+x = data.drop(['Фактор риска'], axis=1)
+y = data['Фактор риска']
+
+from sklearn.model_selection import train_test_split
+import numpy as np
+np.random.seed(42)
+
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3)
+
+from sklearn.tree import DecisionTreeClassifier
+tree = DecisionTreeClassifier(max_depth=10)
+tree.fit(x_train, y_train)
+tree_prediction = tree.predict(x_test)
+
+print('accuracy_score', accuracy_score(y_test, tree_prediction))
+print('precision_score', precision_score(y_test, tree_prediction))
+print('recall_score', recall_score(y_test, tree_prediction))
+print('f1_score', f1_score(y_test, tree_prediction, average='macro'))
+# Ищем значения, которые почти не влияют на предсказание, исключаем их из рассмотрения и делаем предсказание без них
+tree_importance = tree.feature_importances_
+pd.Series(data=tree_importance, index=x.columns)
+pd.Series(data=tree_importance, index=x.columns).plot(kind='bar', color='purple')
+tree_importance = pd.Series(data=tree_importance, index=x.columns)
+good_features = tree_importance[tree_importance>0]
+list(good_features.index)
+x = data.drop(['Фактор риска'], axis=1)[list(good_features.index)]
+y = data['Фактор риска']
+
+from sklearn.model_selection import train_test_split
+import numpy as np
+np.random.seed(42)
+
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3)
+
+from sklearn.tree import DecisionTreeClassifier
+tree = DecisionTreeClassifier(max_depth=10)
+tree.fit(x_train, y_train)
+tree_prediction = tree.predict(x_test)
+
+print('accuracy_score', accuracy_score(y_test, tree_prediction))
+print('precision_score', precision_score(y_test, tree_prediction))
+print('recall_score', recall_score(y_test, tree_prediction))
+print('f1_score', f1_score(y_test, tree_prediction, average='macro'))
+#2-й метод соседи
+from sklearn.neighbors import KNeighborsClassifier
+import numpy as np
+np.random.seed(42)
+
+x = data.drop(['Фактор риска'], axis=1) 
+y = data['Фактор риска']
+
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3)
+
+knn_model = KNeighborsClassifier(3)
+knn_model.fit(x_train, y_train)
+knn_pred = knn_model.predict(x_test)
+accuracy = accuracy_score(y_test, knn_pred)
+
+print('accuracy_score', accuracy_score(y_test, knn_pred))
+print('precision_score', precision_score(y_test, knn_pred))
+print('recall_score', recall_score(y_test, knn_pred))
+print('f1_score', f1_score(y_test, knn_pred, average='macro'))
+#Подключим библиотеку MinMaxScaler, чтобы ввести рамки от 0 до 1 для каждой из переменных
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.preprocessing import MinMaxScaler
+import numpy as np
+np.random.seed(42)
+
+x = data.drop(['Фактор риска'], axis=1) 
+y = data['Фактор риска']
+
+scaler = MinMaxScaler()
+scaler.fit(x)
+x_transformed = scaler.transform(x)
+x_transformed
+
+x_train, x_test, y_train, y_test = train_test_split(x_transformed, y, test_size=0.3)
+
+knn_model = KNeighborsClassifier(3)
+knn_model.fit(x_train, y_train)
+knn_pred = knn_model.predict(x_test)
+accuracy = accuracy_score(y_test, knn_pred)
+
+print('accuracy_score', accuracy_score(y_test, knn_pred))
+print('precision_score', precision_score(y_test, knn_pred))
+print('recall_score', recall_score(y_test, knn_pred))
+print('f1_score', f1_score(y_test, knn_pred, average='macro'))
+#3-й метод - логистическая регрессия
+from sklearn.linear_model import LogisticRegression
+import numpy as np
+np.random.seed(42)
+
+x = data.drop(['Фактор риска'], axis=1)
+y = data['Фактор риска']
+
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3)
+
+Ir = LogisticRegression(C=1).fit(x_train, y_train)
+Ir_pred = Ir.predict(x_test)
+
+print('accuracy_score', accuracy_score(y_test, Ir_pred))
+print('precision_score', precision_score(y_test, Ir_pred))
+print('recall_score', recall_score(y_test, Ir_pred))
+print('f1_score', f1_score(y_test, Ir_pred, average='macro'))
+#4-й метод - градиентный бустинг
+from xgboost import XGBClassifier
+import numpy as np
+np.random.seed(42)
+
+x = data.drop(['Фактор риска'], axis=1) 
+y = data['Фактор риска']
+
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3)
+
+xgb_model = XGBClassifier(max_depth=4, n_estimators=1000, learning_rate=0.0088).fit(x_train, y_train)
+xgb_model.fit(x_train, y_train)
+xgb_pred = xgb_model.predict(x_test)
+
+print('accuracy_score', accuracy_score(y_test, xgb_pred))
+print('precision_score', precision_score(y_test, xgb_pred))
+print('recall_score', recall_score(y_test, xgb_pred))
+print('f1_score', f1_score(y_test, xgb_pred, average='macro'))
+#Проведём полный перебор в определённых данных
+from xgboost import XGBClassifier
+from hyperopt import hp, fmin, tpe, Trials
+import numpy as np
+np.random.seed(42)
+
+x = data.drop(['Фактор риска'], axis=1) 
+y = data['Фактор риска']
+
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3)
+
+
+params_space = {
+    'learning_rate':    hp.uniform('learning_rate', 0.0001 , 0.25),
+    'max_depth':        hp.choice('max_depth', np.arange(4, 25, 1, dtype=int)),
+    'n_estimators':     hp.choice('n_estimators', np.array([25, 50, 100, 250, 500, 750, 1000]))
+    }
+
+def minimize_function(args):
+  xgb_model = XGBClassifier(**args)
+  xgb_model.fit(x_train, y_train)
+  y_predict = xgb_model.predict(x_test)
+  score = f1_score(y_test, y_predict)
+  return 1 - score
+
+trials = Trials()
+results = fmin(fn=minimize_function, space=params_space, 
+               algo=tpe.suggest, max_evals=200, trials=trials)
+trials.best_trial
+np.arange(4, 25, 1, dtype=int)[0]
+from xgboost import XGBClassifier
+from hyperopt import hp, fmin, tpe, Trials
+
+x = data.drop(['Фактор риска'], axis=1) 
+y = data['Фактор риска']
+
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3)
+
+
+params_space = {
+    'learning_rate':    hp.uniform('learning_rate', 0.0001 , 0.25),
+    'max_depth':        hp.choice('max_depth', np.arange(4, 25, 1, dtype=int)),
+    'n_estimators':     hp.choice('n_estimators', np.array([25, 50, 100, 250, 500, 750, 1000]))
+    }
+
+def minimize_function(args):
+  xgb_model = XGBClassifier(**args)
+  xgb_model.fit(x_train, y_train)
+  y_predict = xgb_model.predict(x_test)
+  score = f1_score(y_test, y_predict)
+  return 1 - score
+
+trials = Trials()
+results = fmin(fn=minimize_function, space=params_space, 
+               algo=tpe.suggest, max_evals=200, trials=trials)
+
